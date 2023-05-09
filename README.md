@@ -18,7 +18,7 @@ vagrant plugin install vagrant-disksize
 ### Build vagrant machine
 ```bash
 git clone https://github.com/hydra-genetics/vagrant.git
-cd vagrant_systems/ubuntu/
+cd vagrant/vagrant_systems/ubuntu/
 vagrant up
 ```
 
