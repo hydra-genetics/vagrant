@@ -16,6 +16,13 @@ vagrant plugin install vagrant-disksize
 ```
 
 ### Build vagrant machine
+Make sure that your ~/.ssh folder contains a id_rsa.pub file, else  modify the following line in ubuntu/Vagrantfile
+```bash
+    authorize_key(config, 'root', '~/.ssh/id_rsa.pub', '~/.ssh/id_rsa.pub')
+```
+to match one of your keys.
+
+
 ```bash
 git clone https://github.com/hydra-genetics/vagrant.git
 cd vagrant/vagrant_systems/ubuntu/
