@@ -46,7 +46,7 @@ vagrant ssh
 singulariy --help
 
 # Install hydra-genetics
-pip install hydra-genetics -y
+pip install hydra-genetics
 ```
 
 
