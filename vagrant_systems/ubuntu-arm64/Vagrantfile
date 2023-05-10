@@ -1,0 +1,56 @@
+#Define the list of machines
+machines = {
+    :ubuntutestserver => {
+        :hostname => "ubuntu_snakemake_server",
+        :ipaddress => "10.10.10.45",
+    },
+}
+
+#Provisioning inline script
+$script = <<SCRIPT
+ssh-keygen -f /home/vagrant/.ssh/id_rsa -q -N ""
+sudo apt-get update -qq
+
+export VERSION=3.11.2 
+mkdir -p /sylabs
+cd /sylabs
+wget https://github.com/sylabs/singularity/releases/download/v${VERSION}/singularity-ce_${VERSION}-jammy_amd64.deb
+sudo apt-get install /sylabs/singularity-ce_${VERSION}-jammy_amd64.deb -y 
+
+sudo apt-get install python3 python3-pip -y
+
+SCRIPT
+
+# Script for bootstraping the keys to the virtual
+# machines.
+require_relative "../vagrant/key_authorization.rb"
+
+VAGRANT_API_VERSION = "2"
+
+Vagrant.configure(VAGRANT_API_VERSION) do |global_config|
+    machines.each_pair do |name, options|
+        global_config.vm.define name do |config|
+            #VM configurations
+#            config.vm.box = "ilker/ubuntu2004"
+            config.vm.box = "kula/bullseye-arm64"
+            config.vm.hostname = "#{name}"
+#            config.vm.network :private_network, ip: options[:ipaddress]
+            config.disksize.size = '100GB'
+            authorize_key(config, 'root', '~/.ssh/id_rsa.pub', '~/.ssh/id_rsa.pub')
+
+            #VM specifications
+            config.vm.provider :virtualbox do |v|
+                v.customize ["modifyvm", :id, "--memory", "8192"]
+            end
+
+            config.vm.synced_folder "data/", "/data_folder"
+
+            #VM provisioning
+            config.vm.provision :shell,
+                :inline => $script
+
+#            config.vm.provision "file", source: "./config/registries.conf", destination: "/tmp/registries.conf"
+#            config.vm.provision "shell", inline: "mv /tmp/registries.conf /etc/containers/registries.conf"
+        end
+    end
+end
